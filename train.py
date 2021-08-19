@@ -21,7 +21,7 @@ parser.add_argument('--ratio', type=float, default=0.2, help='training ratio.')
 parser.add_argument('--coeff1', type=float, default=1.0, help='coefficient for within-network link prediction loss.')
 parser.add_argument('--coeff2', type=float, default=1.0, help='coefficient for anchor link prediction loss.')
 parser.add_argument('--lr', type=float, default=0.01, help='learning rate')
-parser.add_argument('--epochs', type=int, default=50, help='maximum number of epochs.')
+parser.add_argument('--epochs', type=int, default=100, help='maximum number of epochs.')
 parser.add_argument('--batch_size', type=int, default=300, help='batch_size.')
 parser.add_argument('--walks_num', type=int, default=100,
                         help='length of walk per user node.')
@@ -175,9 +175,9 @@ for epoch in range(args.epochs):
         pn_examples2, _ = negative_sampling_exact(out_x, args.N_negs, anchor_nodes2, node_mapping2,
                                                           'p_n', 'g2')
         pnc_examples1, _ = negative_sampling_exact(out_x, args.N_negs, anchor_nodes1, node_mapping1,
-                                                            'p_nc', 'g1')
+                                                            'p_nc', 'g1', node_mapping2=node_mapping2)
         pnc_examples2, _ = negative_sampling_exact(out_x, args.N_negs, anchor_nodes2, node_mapping2,
-                                                            'p_nc', 'g2')
+                                                            'p_nc', 'g2', node_mapping2=node_mapping1)
 
         t_neg_sampling += (time.time() - t0)
 
@@ -193,8 +193,8 @@ for epoch in range(args.epochs):
         anchor2_emb = out_x[node_mapping2[anchor_nodes2]]
         context_neg1_emb = out_x[node_mapping1[pn_examples1]]
         context_neg2_emb = out_x[node_mapping2[pn_examples2]]
-        anchor_neg1_emb = out_x[node_mapping1[pnc_examples1]]
-        anchor_neg2_emb = out_x[node_mapping2[pnc_examples2]]
+        anchor_neg1_emb = out_x[node_mapping2[pnc_examples1]]
+        anchor_neg2_emb = out_x[node_mapping1[pnc_examples2]]
 
         input_embs = (anchor1_emb, anchor2_emb, context_pos1_emb, context_pos2_emb, context_neg1_emb,
                       context_neg2_emb, anchor_neg1_emb, anchor_neg2_emb)

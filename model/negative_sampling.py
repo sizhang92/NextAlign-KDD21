@@ -3,7 +3,7 @@ from sklearn.metrics.pairwise import manhattan_distances
 from scipy.special import expit
 
 
-def negative_sampling_exact(x, N_negs, node1, node_mapping, target_dist_name, graph_name, removed=0):
+def negative_sampling_exact(x, N_negs, node1, node_mapping, target_dist_name, graph_name, removed=0, node_mapping2=None):
     '''
     Proposed sampling in NextAlign.
     @param x: node embedding matrix
@@ -20,6 +20,8 @@ def negative_sampling_exact(x, N_negs, node1, node_mapping, target_dist_name, gr
     node1 = node1.cpu().detach().numpy()
     x = x.cpu().detach().numpy()
     node_mapping = node_mapping.cpu().detach().numpy()
+    if node_mapping2 is not None:
+        node_mapping2 = node_mapping2.cpu().detach().numpy()
     out_features = x.shape[1]
     if target_dist_name == 'p_n':
         if graph_name == 'g1':
@@ -28,6 +30,7 @@ def negative_sampling_exact(x, N_negs, node1, node_mapping, target_dist_name, gr
         else:
             emb1 = x[node_mapping[node1], out_features // 2: out_features]
             emb2 = x[node_mapping, out_features // 2: out_features]
+        n2 = node_mapping.shape[0]
         inner_products = np.dot(emb1, emb2.T)
         inner_products = expit(-inner_products)
         # inner_products = manhattan_distances(emb1, emb2)
@@ -36,10 +39,11 @@ def negative_sampling_exact(x, N_negs, node1, node_mapping, target_dist_name, gr
     elif target_dist_name == 'p_dc':
         if graph_name == 'g1':
             emb1 = x[node_mapping[node1], out_features//2: out_features]
-            emb2 = x[node_mapping, out_features//2: out_features]
+            emb2 = x[node_mapping2, out_features//2: out_features]
         else:
             emb1 = x[node_mapping[node1], 0: out_features//2]
-            emb2 = x[node_mapping, 0: out_features//2]
+            emb2 = x[node_mapping2, 0: out_features//2]
+        n2 = node_mapping2.shape[0]
         inner_products = np.dot(emb1, emb2.T)
         inner_products = expit(inner_products)
         # inner_products = -manhattan_distances(emb1, emb2)
@@ -49,8 +53,9 @@ def negative_sampling_exact(x, N_negs, node1, node_mapping, target_dist_name, gr
     else:
         emb1_1 = x[node_mapping[node1], 0:out_features//2]
         emb1_2 = x[node_mapping[node1], out_features // 2: out_features]
-        emb2_1 = x[node_mapping, 0:out_features//2]
-        emb2_2 = x[node_mapping, out_features // 2: out_features]
+        emb2_1 = x[node_mapping2, 0:out_features//2]
+        emb2_2 = x[node_mapping2, out_features // 2: out_features]
+        n2 = node_mapping2.shape[0]
 
         inner_products = np.dot(emb1_1, emb2_2.T) * 1 \
                          + np.dot(emb1_2, emb2_1.T) * 1
@@ -60,7 +65,7 @@ def negative_sampling_exact(x, N_negs, node1, node_mapping, target_dist_name, gr
 
     generate_examples = []
     probs = []
-    n2 = node_mapping.shape[0]
+
 
     for i in range(len(node1)):
         p_probs[i][node1[i]] = 0
