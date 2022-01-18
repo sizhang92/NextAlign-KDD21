@@ -37,7 +37,7 @@ parser.add_argument('--walk_length', type=int, default=80,
                     help='Length of walk per source. Default is 80.')
 parser.add_argument('--num_walks', type=int, default=10,
                     help='Number of walks per source. Default is 10.')
-parser.add_argument('--dataset', type=str, default='phone-email', help='dataset name.')
+parser.add_argument('--dataset', type=str, default='new_ACM-DBLP', help='dataset name.')
 parser.add_argument('--use_attr', action='store_true')
 parser.add_argument('--gpu', type=int, default=0, help='cuda number.')
 parser.add_argument('--dist', type=str, default='L1', help='distance for scoring.')
@@ -232,7 +232,7 @@ for epoch in range(args.epochs):
         max_hits = hits
         max_epoch = epoch + 1
 
-    print(max_hits, max_epoch)
+    print("Max test hits:{} at epoch: {}".format(max_hits, max_epoch))
 
 if args.use_attr:
     with open('results/results_%s_attr_%.1f.txt' % (args.dataset, args.ratio), 'a+') as f:
