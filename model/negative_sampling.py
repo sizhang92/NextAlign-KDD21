@@ -68,7 +68,7 @@ def negative_sampling_exact(x, N_negs, node1, node_mapping, target_dist_name, gr
 
 
     for i in range(len(node1)):
-        p_probs[i][node1[i]] = 0
+        p_probs[i][node_mapping[node1[i]]] = 0
         if not isinstance(removed, int):
             p_probs[i][removed] = 0
         p = p_probs[i] / np.sum(p_probs[i])
